@@ -4,10 +4,17 @@ import time
 import matplotlib.pyplot as plt
 import os
 from cv2 import THRESH_BINARY
-import socket 
+import socket
+from pipes import Pipes
 
-cap = cv2.VideoCapture(1)
+from simulation_camera import SimulationCamera
 
+IS_SIMULATION = os.getenv("RIOL_SIMULATION", False)    
+
+if not IS_SIMULATION:
+    cap = cv2.VideoCapture(0)
+else:
+    simulation_camera = SimulationCamera()
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -22,11 +29,20 @@ outputs = []
 black_detected = False
 white_detected = False
 green_detected = False
+
+
+def get_frame():
+    if not IS_SIMULATION:
+        _, frame = cap.read()
+        return frame[100:400, 140: 420]
+    return simulation_camera.get_frame()
+    
+
+
 while True:
 
 
-    _, frame = cap.read()
-    frame = frame[100:400, 140:420]
+    frame = get_frame()
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     
 
@@ -168,5 +184,6 @@ while True:
     if key == 27:
         
         break
-cap.release()
+if not IS_SIMULATION:
+    cap.release()
 cv2.destroyAllWindows()

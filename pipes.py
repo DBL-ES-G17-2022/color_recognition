@@ -1,4 +1,4 @@
-import os, sys
+import struct
 
 class Pipes:
     def __init__(self, path):
@@ -11,4 +11,4 @@ class Pipes:
     def read_pipe(self, data_length):
         with open(self.path, "rb") as file:
             data = file.read(data_length)
-        return int.from_bytes(data, "big")
+        return struct.unpack(">"+str(int(data_length / 4))+"f", data)
