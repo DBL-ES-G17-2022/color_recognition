@@ -84,6 +84,7 @@ while True:
 
         if area_white > 7000:
             cv2.drawContours(frame, [approx_white], 0, (255, 105, 180), 3)
+            outputs.append("1")
             # print("White")
             # (print(area_white))
             # white_count+=1
@@ -98,7 +99,7 @@ while True:
             #         white_count = 0
             #         break
         else:
-            print("1")
+            print("0")
     
     if not new_white_detected:
         white_detected = False
@@ -112,6 +113,7 @@ while True:
 
         if area_black > 7000:
             cv2.drawContours(frame, [approx_black], 0, (255, 105, 180), 3)
+            outputs.append("2")
             # print("Black")
             # (print(area_black))        
             # black_count +=1
@@ -122,7 +124,7 @@ while True:
             #     break
             #     # s.sendall(b"1")
         else:
-            print("2")
+            print("0")
 
 
     for cnt_green in contour_green:
@@ -134,6 +136,7 @@ while True:
         
         if area_green > 5000:
             cv2.drawContours(frame, [approx_green], 0, (255, 105, 180), 3)
+            outputs.append("3")
             # print("Green")
             # (print(area_green))
             # green_count +=1
@@ -144,7 +147,7 @@ while True:
             #     if green_count > 10:
             #         break
         else:
-            print("3")
+            print("0")
 
 
 
