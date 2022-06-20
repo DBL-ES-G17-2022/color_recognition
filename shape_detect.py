@@ -8,13 +8,10 @@ import socket
 
 cap = cv2.VideoCapture(1)
 
-
-
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 ip = '192.168.47.1'# '192.168.47.1'
 port = 11334
-
 #s.connect((ip, port))
 
 outputs = []
@@ -26,7 +23,7 @@ while True:
 
 
     _, frame = cap.read()
-    frame = frame[100:400, 140:420]
+    frame = frame[100:500, 200:480]
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     
 
@@ -46,9 +43,9 @@ while True:
     upper_black = np.array([100 , 80 , 90])
 
     lower_green = np.array([40 , 40 , 40])
-    upper_green = np.array([90 , 255 , 255])
+    upper_green = np.array([90 , 255 , 200])
 
-    lower_white = np.array([20 , 0 , 230])
+    lower_white = np.array([0 , 0 , 200])
     upper_white = np.array([255 , 255 , 255])
 
 
@@ -74,80 +71,42 @@ while True:
 
     #Draw contours 
 
-    new_white_detected = False
     for cnt_white in contour_white:  
         area_white = cv2.contourArea(cnt_white)
         approx_white = cv2.approxPolyDP(cnt_white, 0.01*cv2.arcLength(cnt_white, True), True)
-
+        #print("white: ", area_white)
         x,y,w,h = cv2.boundingRect(cnt_white)
         cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
 
         if area_white > 7000:
             cv2.drawContours(frame, [approx_white], 0, (255, 105, 180), 3)
             outputs.append("1")
-            # print("White")
-            # (print(area_white))
-            # white_count+=1
-            # print("white: ", white_count)
-            # if white_count > 5:
-            #     new_white_detected = True
 
-            #     if not white_detected: 
-            #         print("found")
-            #         print(" 1")
-            #         white_detected = True
-            #         white_count = 0
-            #         break
-        else:
-            print("0")
-    
-    if not new_white_detected:
-        white_detected = False
 
     for cnt_black in contour_black:
         area_black = cv2.contourArea(cnt_black)
         approx_black = cv2.approxPolyDP(cnt_black, 0.01*cv2.arcLength(cnt_black, True), True)
-
+        #print("black: ", area_black)
         x,y,w,h = cv2.boundingRect(cnt_black)
         cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
 
-        if area_black > 7000:
+        if area_black > 5000:
             cv2.drawContours(frame, [approx_black], 0, (255, 105, 180), 3)
             outputs.append("2")
-            # print("Black")
-            # (print(area_black))        
-            # black_count +=1
-            # print("black", black_count)
-            # if black_count > 5:
-            #     print("found")
-            #     print("2")
-            #     break
-            #     # s.sendall(b"1")
-        else:
-            print("0")
+
 
 
     for cnt_green in contour_green:
         area_green = cv2.contourArea(cnt_green)
         approx_green = cv2.approxPolyDP(cnt_green, 0.01*cv2.arcLength(cnt_green, True), True)
-
+        print("green: ", area_green)
         x,y,w,h = cv2.boundingRect(cnt_green)
         cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
         
         if area_green > 5000:
             cv2.drawContours(frame, [approx_green], 0, (255, 105, 180), 3)
             outputs.append("3")
-            # print("Green")
-            # (print(area_green))
-            # green_count +=1
-            # print("green :", green_count)
-            # if green_count > 5:
-            #     print("found")
-            #     print("3")
-            #     if green_count > 10:
-            #         break
-        else:
-            print("0")
+
 
 
 
@@ -162,11 +121,10 @@ while True:
     #ultra_mask = mask + green_mask + white_mask
     #cv2.imshow("All Mask", ultra_mask)
 
-    
     #esc to close windows
     key = cv2.waitKey(1)
     if key == 27:
-        
+        print(outputs)
         break
 cap.release()
 cv2.destroyAllWindows()
