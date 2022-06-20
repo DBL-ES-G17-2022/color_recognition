@@ -4,9 +4,20 @@ import time
 import matplotlib.pyplot as plt
 import os
 from cv2 import THRESH_BINARY
-import socket 
+import socket
+from pipes import Pipes
 
-cap = cv2.VideoCapture(1)
+from simulation_camera import SimulationCamera
+
+
+IS_SIMULATION = os.getenv("RIOL_SIMULATION", False)    
+
+if not IS_SIMULATION:
+    cap = cv2.VideoCapture(0)
+else:
+    simulation_camera = SimulationCamera()
+
+robot_operator_pipe = Pipes("/tmp/disk_detection")
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -19,11 +30,20 @@ outputs = []
 black_detected = False
 white_detected = False
 green_detected = False
+
+
+def get_frame():
+    if not IS_SIMULATION:
+        _, frame = cap.read()
+        return frame[250:450, 140: 420]
+    return simulation_camera.get_frame()
+    
+wrote_to_pipe = False
+
 while True:
+    frame = get_frame()
 
 
-    _, frame = cap.read()
-    frame = frame[100:500, 200:480]
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     
 
@@ -80,8 +100,9 @@ while True:
 
         if area_white > 7000:
             cv2.drawContours(frame, [approx_white], 0, (255, 105, 180), 3)
-            outputs.append("1")
 
+            robot_operator_pipe.write_pipe([1])
+            wrote_to_pipe = True
 
     for cnt_black in contour_black:
         area_black = cv2.contourArea(cnt_black)
@@ -92,9 +113,9 @@ while True:
 
         if area_black > 5000:
             cv2.drawContours(frame, [approx_black], 0, (255, 105, 180), 3)
-            outputs.append("2")
 
-
+            robot_operator_pipe.write_pipe([2])
+            wrote_to_pipe = True
 
     for cnt_green in contour_green:
         area_green = cv2.contourArea(cnt_green)
@@ -105,12 +126,14 @@ while True:
         
         if area_green > 5000:
             cv2.drawContours(frame, [approx_green], 0, (255, 105, 180), 3)
-            outputs.append("3")
+            robot_operator_pipe.write_pipe([3])
+            wrote_to_pipe = True
 
 
 
 
-            
+    if not wrote_to_pipe:
+        robot_operator_pipe.write_pipe([0])
     #show all needed windows
     cv2.imshow("Frame", frame)
     cv2.imshow("Mask", mask)
@@ -126,5 +149,6 @@ while True:
     if key == 27:
         print(outputs)
         break
-cap.release()
+if not IS_SIMULATION:
+    cap.release()
 cv2.destroyAllWindows()
