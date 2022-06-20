@@ -42,7 +42,7 @@ while True:
     lower_black = np.array([0 , 0 , 0])
     upper_black = np.array([100 , 80 , 90])
 
-    lower_green = np.array([40 , 40 , 40])
+    lower_green = np.array([40 , 40 , 70])
     upper_green = np.array([90 , 255 , 200])
 
     lower_white = np.array([0 , 0 , 200])
@@ -99,7 +99,7 @@ while True:
     for cnt_green in contour_green:
         area_green = cv2.contourArea(cnt_green)
         approx_green = cv2.approxPolyDP(cnt_green, 0.01*cv2.arcLength(cnt_green, True), True)
-        print("green: ", area_green)
+        #print("green: ", area_green)
         x,y,w,h = cv2.boundingRect(cnt_green)
         cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
         
